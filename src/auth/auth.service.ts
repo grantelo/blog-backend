@@ -1,18 +1,16 @@
-import {ForbiddenException, Injectable} from '@nestjs/common';
+import {ConflictException, Injectable, InternalServerErrorException} from '@nestjs/common';
 import {UsersService} from "../users/users.service";
 import {CreateUserDto} from "../users/dto/create-user.dto";
-import {JwtService} from '@nestjs/jwt';
-import {PickType} from '@nestjs/mapped-types';
-import {use} from 'passport';
-import _ from 'lodash';
+import {TokensService} from "../tokens/tokens.service";
+import {IToken} from "../tokens/interfaces/token.interface";
+
 
 @Injectable()
 export class AuthService {
     constructor(
         private userService: UsersService,
-        private jwtService: JwtService
-    ) {
-    }
+        private tokenService: TokensService
+    ) {}
 
     async validateUser(email: string, password: string): Promise<any> {
         const user = await this.userService.findByCondition({
@@ -28,30 +26,38 @@ export class AuthService {
         return null;
     }
 
-    generateJwtToken(data: { id: number, email: string }): string  {
-        const payload = {email: data.email, sub: data.id}
-        return this.jwtService.sign(payload)
-    }
-
     async login(user: any) {
         const {password, ...userData} = user;
 
+        const tokens: IToken = this.tokenService.generateJwtTokens(userData)
+
         return {
             ...userData,
-            token: this.generateJwtToken(userData)
+            token: this.tokenService.generateJwtTokens(userData)
         }
     }
 
 
     async register(dto: CreateUserDto) {
         try {
+            const candidate = await this.userService.findByCondition({email: dto.email})
+
+            if(candidate) {
+                throw new ConflictException("Пользователь с таким email уже существует")
+            }
+
             const {password, ...userData} = await this.userService.create(dto)
+
             return {
                 ...userData,
-                token: this.generateJwtToken(userData)
+                token: this.tokenService.generateJwtTokens(userData)
             }
         } catch (err) {
-            throw new ForbiddenException("Ошибка при регистрации")
+            console.log(err)
+            if(!(err instanceof ConflictException))
+                throw new InternalServerErrorException("Ошибка при регистрации")
+
+            throw err
         }
     }
 }

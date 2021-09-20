@@ -5,9 +5,15 @@ import {UsersModule} from './users/users.module';
 import {AuthModule} from './auth/auth.module';
 import {TypeOrmModule} from "@nestjs/typeorm";
 import {User} from "./users/entities/user.entity";
+import {ConfigModule} from "@nestjs/config";
+import { TokensModule } from './tokens/tokens.module';
+import {Token} from "./tokens/entities/token.entity";
 
 @Module({
     imports: [
+        ConfigModule.forRoot({
+            isGlobal: true
+        }),
         TypeOrmModule.forRoot({
             type: 'postgres',
             host: 'localhost',
@@ -15,11 +21,13 @@ import {User} from "./users/entities/user.entity";
             username: 'postgres',
             password: '1111',
             database: 'blog',
-            entities: [User],
+            entities: [User, Token],
             synchronize: true,
         }),
         UsersModule,
-        AuthModule],
+        AuthModule,
+        TokensModule,
+    ],
     controllers: [AppController],
     providers: [AppService],
 })

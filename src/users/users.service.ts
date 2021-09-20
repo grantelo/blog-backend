@@ -14,7 +14,7 @@ export class UsersService {
   ) {}
 
   create(dto: CreateUserDto) {
-    return this.repository.create(dto)
+    return this.repository.save(dto)
   }
 
   findAll() {
@@ -25,7 +25,7 @@ export class UsersService {
     return `This action returns a #${id} user`;
   }
 
-  findByCondition(condition: LoginUserDto) {
+  findByCondition(condition: Object) {
     return this.repository.findOne(condition)
   }
 

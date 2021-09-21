@@ -29,6 +29,14 @@ export class UsersService {
     return this.repository.findOne(condition)
   }
 
+  findByConditionWithUnselected(condition: Object) {
+    return this.repository
+      .createQueryBuilder("user")
+      .where(condition)
+      .addSelect("password")
+      .getOne()
+  }
+
   update(id: number, updateUserDto: UpdateUserDto) {
     return `This action updates a #${id} user`;
   }

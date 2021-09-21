@@ -1,4 +1,4 @@
-import {Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn} from "typeorm";
+import {BeforeInsert, Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn} from "typeorm";
 
 @Entity()
 export class User {
@@ -11,12 +11,19 @@ export class User {
     @Column({unique: true})
     email: string
 
-    @Column({nullable: true})
+    @Column({select: false})
     password: string
+
+    @Column({select: false})
+    activationLink: string
+
+    @Column({select: false, default: false})
+    isActivated: boolean
 
     @CreateDateColumn()
     createdAt: Date
 
     @UpdateDateColumn()
     updateAt: Date
+
 }

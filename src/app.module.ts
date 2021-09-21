@@ -8,6 +8,7 @@ import {User} from "./users/entities/user.entity";
 import {ConfigModule} from "@nestjs/config";
 import { TokensModule } from './tokens/tokens.module';
 import {Token} from "./tokens/entities/token.entity";
+import { MailModule } from './mail/mail.module';
 
 @Module({
     imports: [
@@ -27,6 +28,7 @@ import {Token} from "./tokens/entities/token.entity";
         UsersModule,
         AuthModule,
         TokensModule,
+        MailModule,
     ],
     controllers: [AppController],
     providers: [AppService],

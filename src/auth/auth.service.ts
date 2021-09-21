@@ -1,15 +1,19 @@
 import {ConflictException, Injectable, InternalServerErrorException} from '@nestjs/common';
+import * as bcrypt from 'bcrypt';
+import {v4} from 'uuid';
 import {UsersService} from "../users/users.service";
 import {CreateUserDto} from "../users/dto/create-user.dto";
 import {TokensService} from "../tokens/tokens.service";
 import {IToken} from "../tokens/interfaces/token.interface";
+import {MailService} from "../mail/mail.service";
 
 
 @Injectable()
 export class AuthService {
     constructor(
         private userService: UsersService,
-        private tokenService: TokensService
+        private tokenService: TokensService,
+        private mailService: MailService
     ) {}
 
     async validateUser(email: string, password: string): Promise<any> {
@@ -46,11 +50,17 @@ export class AuthService {
                 throw new ConflictException("Пользователь с таким email уже существует")
             }
 
-            const {password, ...userData} = await this.userService.create(dto)
+            const activationLink = v4()
+            const hashPassword = await bcrypt.hash(dto.password, 3)
+            this.mailService.sendActivationMail(dto.email, activationLink)
+
+            const {password, ...userData} = await this.userService.create({...dto, password: hashPassword, activationLink})
+
+            console.log(await this.userService.findByCondition({id: userData.id}))
 
             return {
                 ...userData,
-                token: this.tokenService.generateJwtTokens(userData)
+                ...this.tokenService.generateJwtTokens(userData)
             }
         } catch (err) {
             console.log(err)

@@ -1,11 +1,9 @@
 import {Body, Injectable} from '@nestjs/common';
 import {ObjectID, Repository} from "typeorm";
 import {JwtService} from "@nestjs/jwt";
-import { UpdateTokenDto } from './dto/update-token.dto';
 import {IToken} from "./interfaces/token.interface";
 import {Token} from "./entities/token.entity"
 import {InjectRepository} from "@nestjs/typeorm";
-import {use} from "passport";
 
 @Injectable()
 export class TokensService {

@@ -18,9 +18,10 @@ export class AuthService {
   }
 
   async validateUser(dto: LoginUserDto): Promise<any> {
-    const user = await this.userService.findByConditionWithUnselected({email: })
-
-    console.log(user);
+    const user = await this.userService.findByCondition({
+      select: ["id", "fullName", "email", "password", "activationLink", "isActivated"],
+      where: {email: dto.email}
+    })
 
     if (!user) return null;
 
@@ -42,7 +43,6 @@ export class AuthService {
 
 
   async register(dto: CreateUserDto) {
-    try {
       const candidate = await this.userService.findByCondition({ email: dto.email });
 
       if (candidate) {
@@ -51,7 +51,7 @@ export class AuthService {
 
       const activationLink = v4();
       const hashPassword = await bcrypt.hash(dto.password, 3);
-      this.mailService.sendActivationMail(dto.email, activationLink);
+      await this.mailService.sendActivationMail(dto.email, activationLink);
 
       const { password, ...userData } = await this.userService.create({
         ...dto,
@@ -63,12 +63,6 @@ export class AuthService {
         ...userData,
         ...this.tokenService.generateJwtTokens(userData),
       };
-    } catch (err) {
-      console.log(err);
-      if (!(err instanceof ConflictException))
-        throw new InternalServerErrorException('Ошибка при регистрации');
-
-      throw err;
     }
-  }
+
 }

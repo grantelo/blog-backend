@@ -1,5 +1,5 @@
 import {Response} from "express";
-import {Body, Controller, Get, Post, Request, Res, UseGuards} from "@nestjs/common";
+import {Body, Controller, Get, Param, Post, Request, Res, UseGuards} from "@nestjs/common";
 import {AuthService} from "./auth.service";
 import {CreateUserDto} from "../users/dto/create-user.dto";
 import {LocalAuthGuard} from "./guards/local-auth.guard";
@@ -19,5 +19,10 @@ export class AuthController {
         const user = await this.authService.register(dto)
         response.cookie('refreshToken', user.refreshToken, {maxAge: 1000 * 60 * 60 * 24 * 30, httpOnly: true})
         return user
+    }
+
+    @Get("activation:link")
+    activation(@Param("link") link: string) {
+        return this.authService.activation
     }
 }

@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import {BadRequestException, ConflictException, Injectable, InternalServerErrorException} from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { v4 } from 'uuid';
 import { UsersService } from '../users/users.service';
@@ -7,6 +7,7 @@ import { TokensService } from '../tokens/tokens.service';
 import { MailService } from '../mail/mail.service';
 import { LoginUserDto } from '../users/dto/login-user.dto';
 import { User } from '../users/entities/user.entity';
+import {use} from "passport";
 
 @Injectable()
 export class AuthService {
@@ -63,6 +64,17 @@ export class AuthService {
         ...userData,
         ...this.tokenService.generateJwtTokens(userData),
       };
+    }
+
+    async activation(activationLink: string) {
+      const user = await this.userService.findByCondition({activationLink})
+
+        if(!user) {
+            throw new BadRequestException("Некорректная ссылка активации")
+        }
+
+        user.isActivated = true
+        this.userService.update(user.id, user)
     }
 
 }

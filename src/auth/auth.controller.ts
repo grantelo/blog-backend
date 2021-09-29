@@ -21,8 +21,10 @@ export class AuthController {
         return user
     }
 
-    @Get("activation:link")
-    activation(@Param("link") link: string) {
-        return this.authService.activation
+    @Get("activation/:link")
+    async activation(@Res({ passthrough: true }) response: Response, @Param("link") link: string) {
+        console.log("link" + link)
+        await this.authService.activation(link)
+        response.redirect(process.env.CLIENT_URL)
     }
 }

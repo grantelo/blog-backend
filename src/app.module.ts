@@ -9,6 +9,7 @@ import {ConfigModule} from "@nestjs/config";
 import { TokensModule } from './tokens/tokens.module';
 import {Token} from "./tokens/entities/token.entity";
 import { MailModule } from './mail/mail.module';
+import { PostModule } from './post/post.module';
 
 @Module({
     imports: [
@@ -29,6 +30,7 @@ import { MailModule } from './mail/mail.module';
         AuthModule,
         TokensModule,
         MailModule,
+        PostModule,
     ],
     controllers: [AppController],
     providers: [AppService],

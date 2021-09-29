@@ -7,11 +7,12 @@ export class MailService {
     }
 
     public async sendActivationMail(to: string, link: string): Promise<void> {
+        console.log(link)
         await this.mailService
             .sendMail({
                 from: process.env.SMTP_USER,
                 to,
-                subject: "\"Активация аккаунта на: \" + process.env.API_URL",
+                subject: "\"Активация аккаунта на: \"" + process.env.API_URL,
                 html:
                     `
                     <div>

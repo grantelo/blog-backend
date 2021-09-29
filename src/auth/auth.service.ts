@@ -52,7 +52,8 @@ export class AuthService {
 
       const activationLink = v4();
       const hashPassword = await bcrypt.hash(dto.password, 3);
-      await this.mailService.sendActivationMail(dto.email, activationLink);
+      console.log(process.env.CLIENT_URL)
+      await this.mailService.sendActivationMail(dto.email, `${process.env.CLIENT_URL}/auth/activation/` + activationLink);
 
       const { password, ...userData } = await this.userService.create({
         ...dto,

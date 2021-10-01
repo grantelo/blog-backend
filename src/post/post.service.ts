@@ -1,26 +1,102 @@
-import { Injectable } from '@nestjs/common';
-import { CreatePostDto } from './dto/create-post.dto';
-import { UpdatePostDto } from './dto/update-post.dto';
+import {Injectable, NotFoundException} from '@nestjs/common';
+import {CreatePostDto} from './dto/create-post.dto';
+import {UpdatePostDto} from './dto/update-post.dto';
+import {Repository} from "typeorm";
+import {Post} from "./entities/post.entity";
+import {InjectRepository} from "@nestjs/typeorm";
 
 @Injectable()
 export class PostService {
-  create(createPostDto: CreatePostDto) {
-    return 'This action adds a new post';
-  }
+    constructor(
+        @InjectRepository(Post)
+        private readonly repository: Repository<Post>
+    ) {
+    }
 
-  findAll() {
-    return `This action returns all post`;
-  }
+    create(userId: number, createPostDto: CreatePostDto) {
+        return this.repository.save({
+            user: {id: userId},
+            ...createPostDto,
+        })
+    }
 
-  findOne(id: number) {
-    return `This action returns a #${id} post`;
-  }
+    findAll() {
+        return this.repository.find({
+            order: {
+                createdAt: "DESC"
+            }
+        })
+    }
 
-  update(id: number, updatePostDto: UpdatePostDto) {
-    return `This action updates a #${id} post`;
-  }
+    async searchByTag(tag: string) {
+        const qb = this.repository
+            .createQueryBuilder("posts")
+            .where(':tag = ANY (posts.tags)', {tag})
 
-  remove(id: number) {
-    return `This action removes a #${id} post`;
-  }
+        qb.limit(10)
+
+        const [items, total] = await qb.getManyAndCount()
+
+        return {
+            items,
+            total
+        }
+    }
+
+    async popular() {
+        const qb = this.repository
+            .createQueryBuilder("posts")
+
+        qb.orderBy("views", "DESC")
+        qb.limit(10)
+
+        const [items, total] = await qb.getManyAndCount()
+
+        return {
+            items,
+            total
+        }
+    }
+
+    async search(body: string) {
+        const qb = this.repository
+            .createQueryBuilder("posts")
+            .where("posts.body ILIKE :body", {body})
+
+        qb.orderBy("views", "DESC")
+        qb.limit(10)
+
+        const [items, total] = await qb.getManyAndCount()
+
+        return {
+            items,
+            total
+        }
+    }
+
+    async findOne(id: number) {
+        return this.repository
+            .createQueryBuilder("posts")
+            .where("id = :id", {id})
+            .limit()
+            .update()
+            .set({views: () => "views + 1"})
+            .execute()
+    }
+
+    async update(id: number, updatePostDto: UpdatePostDto) {
+        const post = await this.repository.findOne(id)
+
+        if (!post) throw new NotFoundException("Пост не найден")
+
+        return this.repository.update(id, updatePostDto)
+    }
+
+    async remove(id: number) {
+        const post = await this.repository.findOne(id)
+
+        if (!post) throw new NotFoundException("Пост не найден")
+
+        return this.repository.delete(id)
+    }
 }

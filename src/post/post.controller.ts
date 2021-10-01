@@ -1,15 +1,19 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, Request} from '@nestjs/common';
 import { PostService } from './post.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
+import {SearchPostDto} from "./dto/search-post.dto";
+import {JwtAuthGuard} from "../auth/guards/jwt-auth.guard";
+import {log} from "util";
 
 @Controller('post')
 export class PostController {
   constructor(private readonly postService: PostService) {}
 
+  @UseGuards(JwtAuthGuard)
   @Post()
-  create(@Body() createPostDto: CreatePostDto) {
-    return this.postService.create(createPostDto);
+  create(@Request() req, @Body() createPostDto: CreatePostDto) {
+    return this.postService.create(req.user.id, createPostDto);
   }
 
   @Get()
@@ -20,6 +24,17 @@ export class PostController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.postService.findOne(+id);
+  }
+
+  @Get("tag/:title")
+  searchByTag(@Param('title') title: string) {
+    return this.postService.searchByTag(title)
+  }
+
+  @Get("search")
+  searchPosts(@Query() body: string) {
+    console.log(body)
+    return this.postService.search(body)
   }
 
   @Patch(':id')

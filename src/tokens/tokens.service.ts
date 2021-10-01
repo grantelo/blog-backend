@@ -14,8 +14,12 @@ export class TokensService {
       private jwtService: JwtService
   ) {}
 
-  generateJwtTokens(data: { id: number, email: string }): IToken  {
-    const payload = {email: data.email, sub: data.id}
+    create(userId: number, refreshToken: string) {
+      return this.repository.save({user: {id: userId}, refreshToken})
+  }
+
+  generateJwtTokens(data): IToken  {
+    const payload = {...data, sub: data.id}
     const accessToken = this.jwtService.sign(payload, {expiresIn: 60 * 15, secret: process.env.JWT_ACCESS_SECRET,})
     const refreshToken = this.jwtService.sign(payload, {expiresIn: "30d", secret: process.env.JWT_REFRESH_SECRET,})
 

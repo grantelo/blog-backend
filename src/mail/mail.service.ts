@@ -12,7 +12,7 @@ export class MailService {
             .sendMail({
                 from: process.env.SMTP_USER,
                 to,
-                subject: "\"Активация аккаунта на: \"" + process.env.API_URL,
+                subject: "Активация аккаунта на: " + process.env.API_URL,
                 html:
                     `
                     <div>

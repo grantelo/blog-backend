@@ -10,6 +10,7 @@ import { TokensModule } from './tokens/tokens.module';
 import {Token} from "./tokens/entities/token.entity";
 import { MailModule } from './mail/mail.module';
 import { PostModule } from './post/post.module';
+import {Post} from "./post/entities/post.entity";
 
 @Module({
     imports: [
@@ -23,7 +24,7 @@ import { PostModule } from './post/post.module';
             username: 'postgres',
             password: '1111',
             database: 'blog',
-            entities: [User, Token],
+            entities: [User, Token, Post],
             synchronize: true,
         }),
         UsersModule,

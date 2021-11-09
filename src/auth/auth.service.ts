@@ -38,7 +38,7 @@ export class AuthService {
     async login(user: User) {
         return {
             ...user,
-            token: this.tokenService.generateJwtTokens(user)
+            ...this.tokenService.generateJwtTokens(user)
         }
     }
 

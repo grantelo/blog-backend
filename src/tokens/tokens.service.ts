@@ -20,7 +20,7 @@ export class TokensService {
 
   generateJwtTokens(data): IToken  {
     const payload = {...data, sub: data.id}
-    const accessToken = this.jwtService.sign(payload, {expiresIn: 60 * 15, secret: process.env.JWT_ACCESS_SECRET,})
+    const accessToken = this.jwtService.sign(payload, {expiresIn: 60 * 15, secret: process.env.JWT_ACCESS_SECRET, })
     const refreshToken = this.jwtService.sign(payload, {expiresIn: "30d", secret: process.env.JWT_REFRESH_SECRET,})
 
     return {
@@ -46,5 +46,9 @@ export class TokensService {
 
   remove(refreshToken: string) {
     return this.repository.delete({refreshToken})
+  }
+
+  async refresh(refreshToken: string) {
+
   }
 }

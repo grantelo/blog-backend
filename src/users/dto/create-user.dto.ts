@@ -1,15 +1,14 @@
 import {IsEmail, IsNotEmpty, Length} from "class-validator";
 import {UniqueOnDatabase} from "../../auth/validations/UniqueValidation";
 import {User} from "../entities/user.entity"
+import {Column} from "typeorm";
 
 export class CreateUserDto {
     @Length(3)
     fullName: string;
 
-    @IsEmail(null, {message: "Неверная почта"})
-    @UniqueOnDatabase(User, {
-        message: "Пользователь с таким email уже существует"
-    })
+    @UniqueOnDatabase(User, {message: "Пользователь с таким email уже существует"})
+    @IsEmail(undefined, {message: "Неверная почта"})
     email:string;
 
     activationLink: string = ""

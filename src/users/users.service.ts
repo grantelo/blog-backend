@@ -5,6 +5,7 @@ import {UpdateUserDto} from './dto/update-user.dto';
 import {LoginUserDto} from "./dto/login-user.dto";
 import {User} from "./entities/user.entity";
 import {Repository} from "typeorm";
+import {from, Observable, of} from "rxjs";
 
 @Injectable()
 export class UsersService {

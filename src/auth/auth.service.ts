@@ -1,4 +1,10 @@
-import {BadRequestException, ConflictException, Injectable, InternalServerErrorException} from '@nestjs/common';
+import {
+    BadRequestException,
+    ConflictException,
+    Injectable,
+    UnauthorizedException
+} from '@nestjs/common';
+
 import * as bcrypt from 'bcrypt';
 import {v4} from 'uuid';
 import {UsersService} from '../users/users.service';
@@ -7,8 +13,8 @@ import {TokensService} from '../tokens/tokens.service';
 import {MailService} from '../mail/mail.service';
 import {LoginUserDto} from '../users/dto/login-user.dto';
 import {User} from '../users/entities/user.entity';
-import {use} from "passport";
 import {IToken} from "../tokens/interfaces/token.interface";
+
 
 @Injectable()
 export class AuthService {
@@ -16,11 +22,12 @@ export class AuthService {
         private userService: UsersService,
         private tokenService: TokensService,
         private mailService: MailService,
-    ) {}
+    ) {
+    }
 
-    async validateUser(dto: LoginUserDto): Promise<any> {
+    async validateUser(dto: LoginUserDto) {
         const user = await this.userService.findByCondition({
-            select: ["id", "fullName", "email", "password", "activationLink", "isActivated"],
+            select: ["id", "fullName", "email", "password", "isActivated"],
             where: {email: dto.email}
         })
 
@@ -35,10 +42,27 @@ export class AuthService {
         return result
     }
 
+    async validateRefreshToken(user, refreshToken: string) {
+        const token = this.tokenService.findOne({refreshToken})
+
+        if (!token) throw new UnauthorizedException()
+
+        const tokens: IToken = this.tokenService.generateJwtTokens(user)
+        await this.tokenService.updateOrCreate(user.id, tokens.refreshToken)
+
+        return {
+            user,
+            ...tokens
+        }
+    }
+
     async login(user: User) {
+        const tokens: IToken = await this.tokenService.generateJwtTokens(user)
+        await this.tokenService.updateOrCreate(user.id, tokens.refreshToken)
+
         return {
             ...user,
-            ...this.tokenService.generateJwtTokens(user)
+            ...tokens
         }
     }
 
@@ -51,6 +75,7 @@ export class AuthService {
         }
 
         const activationLink = v4();
+        console.log(dto)
         const hashPassword = await bcrypt.hash(dto.password, 3);
         await this.mailService.sendActivationMail(dto.email, `${process.env.CLIENT_URL}/auth/activation/` + activationLink);
 

@@ -23,7 +23,6 @@ export class AuthController {
 
     @Post("register")
     async register(@Res({ passthrough: true }) response: Response, @Body() dto: CreateUserDto) {
-        console.log('saddasdsaa')
         const user = await this.authService.register(dto)
         response.cookie('refreshToken', user.refreshToken, {maxAge: 1000 * 60 * 60 * 24 * 30, httpOnly: true})
         return user

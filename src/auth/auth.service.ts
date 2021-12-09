@@ -61,7 +61,7 @@ export class AuthService {
         await this.tokenService.updateOrCreate(user.id, tokens.refreshToken)
 
         return {
-            ...user,
+            user,
             ...tokens
         }
     }
@@ -90,7 +90,7 @@ export class AuthService {
         await this.tokenService.create(userData.id, tokens.refreshToken)
 
         return {
-            ...userData,
+            user: userData,
             ...tokens,
         };
     }

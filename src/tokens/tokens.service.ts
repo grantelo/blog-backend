@@ -4,6 +4,7 @@ import {JwtService} from "@nestjs/jwt";
 import {IToken} from "./interfaces/token.interface";
 import {Token} from "./entities/token.entity"
 import {InjectRepository} from "@nestjs/typeorm";
+import {use} from "passport";
 
 @Injectable()
 export class TokensService {
@@ -35,20 +36,21 @@ export class TokensService {
 
   async updateOrCreate(userId: number, refreshToken: string) {
     const tokenData = await this.findOne({user: userId})
+    console.log("dasdsnajsadsgasadgaydsagdsaygdy")
 
     if(tokenData) {
+      console.log("work")
       tokenData.refreshToken = refreshToken
-      return this.repository.save(tokenData)
+      await this.repository.save(tokenData)
+      return tokenData
     }
+
+    console.log("now working")
 
     return this.repository.save({refreshToken, user: {id: userId}})
   }
 
   remove(refreshToken: string) {
     return this.repository.delete({refreshToken})
-  }
-
-  async refresh(refreshToken: string) {
-
   }
 }

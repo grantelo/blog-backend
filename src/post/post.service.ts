@@ -16,7 +16,9 @@ export class PostService {
     create(userId: number, createPostDto: CreatePostDto) {
         return this.repository.save({
             user: {id: userId},
-            ...createPostDto,
+            body: createPostDto.body,
+            title: createPostDto.title,
+            tags: createPostDto.tags ?? ""
         })
     }
 
@@ -75,13 +77,18 @@ export class PostService {
     }
 
     async findOne(id: number) {
-        return this.repository
-            .createQueryBuilder("posts")
-            .where("id = :id", {id})
-            .limit()
+        const updateData = await this.repository
+            .createQueryBuilder("post")
+            .leftJoinAndSelect("post.user", "user")
+            .whereInIds(id)
             .update()
-            .set({views: () => "views + 1"})
+            .set({views: () => 'views + 1'})
+            .returning("*")
             .execute()
+
+        console.log(updateData)
+
+        return updateData.raw[0]
     }
 
     async update(id: number, updatePostDto: UpdatePostDto) {
@@ -89,7 +96,7 @@ export class PostService {
 
         if (!post) throw new NotFoundException("Пост не найден")
 
-        return this.repository.update(id, updatePostDto)
+        //return this.repository.update(id, updatePostDto)
     }
 
     async remove(id: number) {

@@ -23,8 +23,8 @@ export class UsersService {
         return `This action returns all users`;
     }
 
-    findOne(id: number) {
-        return `This action returns a #${id} user`;
+    findById(id: number) {
+        return this.repository.findOne(id);
     }
 
     findByCondition(condition: Object) {

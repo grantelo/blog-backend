@@ -11,6 +11,8 @@ import {Token} from "./tokens/entities/token.entity";
 import { MailModule } from './mail/mail.module';
 import { PostModule } from './post/post.module';
 import {Post} from "./post/entities/post.entity";
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
+import {CloudinaryService} from "./cloudinary/cloudinary.service";
 
 @Module({
     imports: [
@@ -32,9 +34,10 @@ import {Post} from "./post/entities/post.entity";
         TokensModule,
         MailModule,
         PostModule,
+        CloudinaryModule,
     ],
     controllers: [AppController],
-    providers: [AppService],
+    providers: [AppService,  CloudinaryService, CloudinaryService],
 })
 export class AppModule {
 }

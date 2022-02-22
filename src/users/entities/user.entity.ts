@@ -20,6 +20,9 @@ export class User {
     @Column({select: false, default: false})
     isActivated: boolean
 
+    @Column({default: ""})
+    avatar: string
+
     @CreateDateColumn()
     createdAt: Date
 

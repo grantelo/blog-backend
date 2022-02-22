@@ -8,6 +8,7 @@ import {
     UpdateDateColumn
 } from "typeorm";
 import {User} from "../../users/entities/user.entity";
+import {OutputBlockData} from "../dto/create-post.dto";
 
 @Entity()
 export class Post {
@@ -21,16 +22,16 @@ export class Post {
     @Column()
     title: string
 
-    @Column()
-    body: string
+    @Column({ type: "jsonb" })
+    body: OutputBlockData[];
 
     @Column({
         default: 0
     })
     views: number
 
-    @Column("text",{nullable: true, array: true})
-    tags?: string[]
+    @Column("text",{nullable: true})
+    tags?: string
 
     @CreateDateColumn({ type: 'timestamp' })
     createdAt: Date;

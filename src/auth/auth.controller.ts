@@ -16,7 +16,9 @@ export class AuthController {
     @UseGuards(LocalAuthGuard)
     @Post("login")
     async login(@Res({ passthrough: true }) response: Response, @Req() req) {
+        console.log(req.user)
         const user = await this.authService.login(req.user)
+        console.log(user)
         response.cookie('refreshToken', user.refreshToken, {maxAge: 1000 * 60 * 60 * 24 * 30, httpOnly: true})
         return user
     }
@@ -39,6 +41,7 @@ export class AuthController {
     @UseGuards(RefreshJwtAuthGuard)
     @Get("refresh")
     refresh(@Req() req, @Body() body) {
-
+        console.log("hi")
+        return req.user
     }
 }

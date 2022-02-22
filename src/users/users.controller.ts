@@ -16,6 +16,12 @@ export class UsersController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Get("me")
+  getMe(@Request() req) {
+    return this.usersService.findById(req.user.id)
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Get("")
   findAll() {
     return this.usersService.findAll();
@@ -23,7 +29,7 @@ export class UsersController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.usersService.findOne(+id);
+    return this.usersService.findById(+id);
   }
 
   @Patch(':id')

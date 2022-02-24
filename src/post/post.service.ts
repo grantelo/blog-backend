@@ -77,18 +77,15 @@ export class PostService {
     }
 
     async findOne(id: number) {
-        const updateData = await this.repository
+        await this.repository
             .createQueryBuilder("post")
             .leftJoinAndSelect("post.user", "user")
             .whereInIds(id)
             .update()
             .set({views: () => 'views + 1'})
-            .returning("*")
             .execute()
 
-        console.log(updateData)
-
-        return updateData.raw[0]
+        return this.repository.findOne(id)
     }
 
     async update(id: number, updatePostDto: UpdatePostDto) {

@@ -13,6 +13,8 @@ import { PostModule } from './post/post.module';
 import {Post} from "./post/entities/post.entity";
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import {CloudinaryService} from "./cloudinary/cloudinary.service";
+import { CommentModule } from './comment/comment.module';
+import { Comment } from './comment/entities/comment.entity';
 
 @Module({
     imports: [
@@ -26,7 +28,7 @@ import {CloudinaryService} from "./cloudinary/cloudinary.service";
             username: 'postgres',
             password: '1111',
             database: 'blog',
-            entities: [User, Token, Post],
+            entities: [User, Token, Post, Comment],
             synchronize: true,
         }),
         UsersModule,
@@ -35,9 +37,10 @@ import {CloudinaryService} from "./cloudinary/cloudinary.service";
         MailModule,
         PostModule,
         CloudinaryModule,
+        CommentModule,
     ],
     controllers: [AppController],
-    providers: [AppService,  CloudinaryService, CloudinaryService],
+    providers: [AppService,  CloudinaryService],
 })
 export class AppModule {
 }

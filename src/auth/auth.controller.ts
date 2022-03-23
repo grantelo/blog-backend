@@ -30,8 +30,6 @@ export class AuthController {
         return user
     }
 
-
-
     @Get("activation/:link")
     async activation(@Res({ passthrough: true }) response: Response, @Param("link") link: string) {
         await this.authService.activation(link)

@@ -1,4 +1,15 @@
-import { Controller, Request, Get, Post, Body, Patch, Param, Delete, UseGuards, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { CommentService } from './comment.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
@@ -16,7 +27,7 @@ export class CommentController {
 
   @UseGuards(JwtAuthGuard)
   @Get()
-  findAll(@Query() query: {postId: string}) {
+  findAll(@Query() query: { postId: string }) {
     return this.commentService.findAll(+query.postId);
   }
 
@@ -32,6 +43,6 @@ export class CommentController {
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.commentService.remove(+id);
+    this.commentService.remove(+id);
   }
 }

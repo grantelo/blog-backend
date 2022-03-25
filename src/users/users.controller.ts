@@ -1,28 +1,35 @@
-import {Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request} from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import {LocalAuthGuard} from "../auth/guards/local-auth.guard";
-import {JwtAuthGuard} from "../auth/guards/jwt-auth.guard";
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @UseGuards(JwtAuthGuard)
-  @Get("profile")
+  @Get('profile')
   getProfile(@Request() req) {
-    return req.user
+    return req.user;
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get("me")
+  @Get('me')
   getMe(@Request() req) {
-    return this.usersService.findById(req.user.id)
+    return this.usersService.findById(req.user.id);
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get("")
+  @Get('')
   findAll() {
     return this.usersService.findAll();
   }

@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 
@@ -14,6 +15,9 @@ import { MailService } from '../mail/mail.service';
 import { LoginUserDto } from '../users/dto/login-user.dto';
 import { User } from '../users/entities/user.entity';
 import { IToken } from '../tokens/interfaces/token.interface';
+import { TokenType } from '../tokens/enums/token.enum';
+import { ChangePasswordUserDto } from '../users/dto/change-password-user.dto';
+import { ResetPasswordUserDto } from '../users/dto/reset-password-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -41,7 +45,10 @@ export class AuthService {
   }
 
   async validateRefreshToken(user, refreshToken: string) {
-    const token = this.tokenService.findOne({ refreshToken });
+    const token = await this.tokenService.findOne({
+      token: refreshToken,
+      type: TokenType.REFRESH_TOKEN,
+    });
 
     if (!token) throw new UnauthorizedException();
 
@@ -52,6 +59,15 @@ export class AuthService {
       user,
       ...tokens,
     };
+  }
+
+  async validateToken(user, token: string) {
+    const candidateToken = await this.tokenService.findOne({
+      token,
+      type: TokenType.FORGOT_PASSWORD,
+    });
+
+    if (!candidateToken) throw new UnauthorizedException();
   }
 
   async login(user: User) {
@@ -89,7 +105,11 @@ export class AuthService {
 
     const tokens: IToken = this.tokenService.generateJwtTokens(userData);
 
-    await this.tokenService.create(userData.id, tokens.refreshToken);
+    await this.tokenService.create(
+      userData.id,
+      TokenType.REFRESH_TOKEN,
+      tokens.refreshToken,
+    );
 
     return {
       user: userData,
@@ -105,6 +125,45 @@ export class AuthService {
     }
 
     user.isActivated = true;
-    this.userService.update(user.id, user);
+    await this.userService.update(user.id, user);
+  }
+
+  async changePassword(userId: number, dto: ChangePasswordUserDto) {
+    const { password, newPassword, repeatNewPassword } = dto;
+
+    if (password === newPassword)
+      return new BadRequestException(
+        'Новый пароль должен быть отличным от прежнего',
+      );
+
+    if (newPassword !== repeatNewPassword)
+      return new BadRequestException('Пароли не совпадают');
+
+    await this.userService.update(userId, { password: newPassword });
+  }
+
+  async forgotPassword(email: string) {
+    const user = await this.userService.findByCondition({ email });
+
+    if (!user)
+      return new NotFoundException('Пользователь с указанным email не найден');
+
+    const token = this.tokenService.generateForgotToken({ ...user });
+
+    await this.tokenService.create(user.id, TokenType.FORGOT_PASSWORD, token);
+
+    await this.mailService.sendResetPasswordMail(
+      user.email,
+      `${process.env.CLIENT_URL}/auth/reset-password?token=` + token,
+    );
+  }
+
+  async resetPassword(
+    userId: number,
+    token: string,
+    dto: ResetPasswordUserDto,
+  ) {
+    await this.changePassword(userId, dto);
+    await this.tokenService.delete(token);
   }
 }

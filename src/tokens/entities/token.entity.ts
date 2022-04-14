@@ -1,16 +1,25 @@
-import {Column, Entity, ObjectID, OneToOne, PrimaryGeneratedColumn} from "typeorm";
-import {JoinColumn} from "typeorm";
-import {User} from "../../users/entities/user.entity";
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  ObjectID,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { User } from '../../users/entities/user.entity';
 
 @Entity()
 export class Token {
-    @PrimaryGeneratedColumn()
-    id: ObjectID
+  @PrimaryGeneratedColumn()
+  id: ObjectID;
 
-    @Column()
-    refreshToken: string
+  @Column()
+  type: string;
 
-    @OneToOne(() => User)
-    @JoinColumn()
-    user: User
+  @Column()
+  token: string;
+
+  @ManyToOne(() => User)
+  @JoinColumn()
+  user: User;
 }

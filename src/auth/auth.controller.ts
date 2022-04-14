@@ -7,6 +7,7 @@ import {
   Post,
   Req,
   Res,
+  UseFilters,
   UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
@@ -14,6 +15,12 @@ import { CreateUserDto } from '../users/dto/create-user.dto';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { RefreshJwtAuthGuard } from './guards/refreshJwt-auth.guard';
 import { TokensService } from '../tokens/tokens.service';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { ChangePasswordUserDto } from '../users/dto/change-password-user.dto';
+import { ResetPasswordUserDto } from '../users/dto/reset-password-user.dto';
+import { ResetPasswordAuthGuard } from './guards/reset-password-auth.guard';
+import { AuthUnauthorizedExceptionFilter } from './auth.filter';
+import { ForgotPasswordUserDto } from '../users/dto/forgot-password-user.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -60,7 +67,32 @@ export class AuthController {
   @UseGuards(RefreshJwtAuthGuard)
   @Get('refresh')
   refresh(@Req() req, @Body() body) {
-    console.log('hi');
     return req.user;
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('change-password')
+  async changePassword(@Req() req, @Body() dto: ChangePasswordUserDto) {
+    this.authService.changePassword(req.user.id, dto);
+  }
+
+  @Post('forgot-password')
+  async forgotPassword(@Res() res, @Body() dto: ForgotPasswordUserDto) {
+    await this.authService.forgotPassword(dto.email);
+    res.json({
+      message: 'Письмо для сброса пароля отправлено на указанный email',
+    });
+  }
+
+  @UseGuards(ResetPasswordAuthGuard)
+  @UseFilters(AuthUnauthorizedExceptionFilter)
+  @Post('reset-password')
+  async resetPassword(
+    @Req() req,
+    @Param('token') token: string,
+    @Body() dto: ResetPasswordUserDto,
+  ) {
+    await this.authService.resetPassword(req.user.id, token, dto);
+    req.redirect(process.env.CLIENT_URL);
   }
 }

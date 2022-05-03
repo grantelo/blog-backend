@@ -45,15 +45,25 @@ export class AuthService {
   }
 
   async validateRefreshToken(user, refreshToken: string) {
+    console.log(refreshToken);
+
     const token = await this.tokenService.findOne({
       token: refreshToken,
       type: TokenType.REFRESH_TOKEN,
     });
 
-    if (!token) throw new UnauthorizedException();
+    console.log(token);
+
+    if (!token) return null;
+
+    console.log('dsadasdkjsidsadjsadusiagdsadtsafdytsafdsayt');
 
     const tokens: IToken = this.tokenService.generateJwtTokens(user);
-    await this.tokenService.updateOrCreate(user.id, tokens.refreshToken);
+    await this.tokenService.updateOrCreate(
+      user.id,
+      tokens.refreshToken,
+      TokenType.REFRESH_TOKEN,
+    );
 
     return {
       user,
@@ -72,7 +82,12 @@ export class AuthService {
 
   async login(user: User) {
     const tokens: IToken = await this.tokenService.generateJwtTokens(user);
-    await this.tokenService.updateOrCreate(user.id, tokens.refreshToken);
+    console.log(tokens);
+    await this.tokenService.updateOrCreate(
+      user.id,
+      tokens.refreshToken,
+      TokenType.REFRESH_TOKEN,
+    );
 
     return {
       user,
@@ -139,7 +154,9 @@ export class AuthService {
     if (newPassword !== repeatNewPassword)
       return new BadRequestException('Пароли не совпадают');
 
-    await this.userService.update(userId, { password: newPassword });
+    const hashPassword = await bcrypt.hash(dto.password, 3);
+
+    await this.userService.update(userId, { password: hashPassword });
   }
 
   async forgotPassword(email: string) {

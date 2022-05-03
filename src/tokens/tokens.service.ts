@@ -4,6 +4,7 @@ import { JwtService } from '@nestjs/jwt';
 import { IToken } from './interfaces/token.interface';
 import { Token } from './entities/token.entity';
 import { InjectRepository } from '@nestjs/typeorm';
+import { TokenType } from './enums/token.enum';
 
 @Injectable()
 export class TokensService {
@@ -41,11 +42,16 @@ export class TokensService {
     });
   }
 
-  findOne(condition: Object) {
+  async findOne(condition: Object) {
+    console.log('condition:');
+    console.log(condition);
+    const t = await this.repository.find();
+    console.log('matched:');
+    console.log(t);
     return this.repository.findOne(condition);
   }
 
-  async updateOrCreate(userId: number, token: string) {
+  async updateOrCreate(userId: number, token: string, type: TokenType) {
     const tokenData = await this.findOne({ user: userId });
 
     if (tokenData) {
@@ -54,7 +60,7 @@ export class TokensService {
       return tokenData;
     }
 
-    return this.repository.save({ token, user: { id: userId } });
+    return this.repository.save({ token, user: { id: userId }, type });
   }
 
   delete(token: string) {

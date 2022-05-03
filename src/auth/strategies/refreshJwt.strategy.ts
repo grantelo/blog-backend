@@ -5,7 +5,6 @@ import { Request } from 'express';
 import { AuthService } from '../auth.service';
 
 const cookieExtractor = (request: Request): string | undefined => {
-  console.log(request.cookies);
   return request.cookies['refreshToken'];
 };
 
@@ -26,10 +25,12 @@ export class RefreshJwtStrategy extends PassportStrategy(
   async validate(req: Request, payload: any) {
     let { iat, sub, exp, ...user } = payload;
 
-    user = this.authService.validateRefreshToken(
+    user = await this.authService.validateRefreshToken(
       user,
       req.cookies['refreshToken'],
     );
+
+    console.log(user);
 
     if (!user) throw new UnauthorizedException();
 

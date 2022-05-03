@@ -8,23 +8,16 @@ import {
   Post,
   Query,
   Request,
-  UploadedFile,
   UseGuards,
-  UseInterceptors,
 } from '@nestjs/common';
 import { PostService } from './post.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { CloudinaryService } from '../cloudinary/cloudinary.service';
 
 @Controller('posts')
 export class PostController {
-  constructor(
-    private readonly postService: PostService,
-    private readonly cloudinaryService: CloudinaryService,
-  ) {}
+  constructor(private readonly postService: PostService) {}
 
   @UseGuards(JwtAuthGuard)
   @Post()
@@ -56,20 +49,6 @@ export class PostController {
   @Patch(':id')
   update(@Param('id') id: string, @Body() updatePostDto: UpdatePostDto) {
     return this.postService.update(+id, updatePostDto);
-  }
-
-  @Post('upload-image')
-  @UseInterceptors(FileInterceptor('image'))
-  async uploadImage(@UploadedFile() file: Express.Multer.File) {
-    const data = await this.cloudinaryService.uploadImage(file);
-
-    return {
-      success: 1,
-      file: {
-        url: data.url,
-        // ... and any additional fields you want to store, such as width, height, color, extension, etc
-      },
-    };
   }
 
   @Delete(':id')

@@ -16,6 +16,10 @@ import { CloudinaryService } from './cloudinary/cloudinary.service';
 import { CommentModule } from './comment/comment.module';
 import { Comment } from './comment/entities/comment.entity';
 import { FileModule } from './file/file.module';
+import { DialogModule } from './dialog/dialog.module';
+import { Dialog } from './dialog/entities/dialog.entity';
+import { MessageModule } from './message/message.module';
+import { Message } from './message/entities/message.entity';
 
 @Module({
   imports: [
@@ -29,7 +33,7 @@ import { FileModule } from './file/file.module';
       username: 'postgres',
       password: '1111',
       database: 'blog',
-      entities: [User, Token, Post, Comment],
+      entities: [User, Token, Post, Comment, Dialog, Message],
       synchronize: true,
     }),
     UsersModule,
@@ -40,6 +44,8 @@ import { FileModule } from './file/file.module';
     CloudinaryModule,
     CommentModule,
     FileModule,
+    DialogModule,
+    MessageModule,
   ],
   controllers: [AppController],
   providers: [AppService, CloudinaryService],

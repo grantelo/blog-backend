@@ -145,6 +145,13 @@ export class AuthService {
 
   async changePassword(userId: number, dto: ChangePasswordUserDto) {
     const { password, newPassword, repeatNewPassword } = dto;
+    const user = await this.userService.findById(userId)
+
+    if (!user) return new NotFoundException("Учетная запись не найдена");
+
+    const isPassEqual = await bcrypt.compare(dto.password, user.password);
+
+    if (!isPassEqual) return new BadRequestException("Старый пароль введен не верно!");
 
     if (password === newPassword)
       return new BadRequestException(
@@ -174,13 +181,21 @@ export class AuthService {
       `${process.env.CLIENT_URL}/auth/reset-password?token=` + token,
     );
   }
+  
 
   async resetPassword(
     userId: number,
     token: string,
     dto: ResetPasswordUserDto,
   ) {
-    await this.changePassword(userId, dto);
+    const { newPassword, repeatNewPassword } = dto;
+
+    if (newPassword !== repeatNewPassword)
+      return new BadRequestException('Пароли не совпадают');
+
+    const hashPassword = await bcrypt.hash(dto.newPassword, 3);
+
+    await this.userService.update(userId, { password: hashPassword });
     await this.tokenService.delete(token);
   }
 }

@@ -20,6 +20,10 @@ import { DialogModule } from './dialog/dialog.module';
 import { Dialog } from './dialog/entities/dialog.entity';
 import { MessageModule } from './message/message.module';
 import { Message } from './message/entities/message.entity';
+import { ChatGateway } from './chat/chat.gateway';
+import { ChatModule } from './chat/chat.module';
+import { OnlineUserModule } from './online-user/online-user.module';
+import { OnlineUser } from './online-user/entities/online-user.entity';
 
 @Module({
   imports: [
@@ -33,7 +37,7 @@ import { Message } from './message/entities/message.entity';
       username: 'postgres',
       password: '1111',
       database: 'blog',
-      entities: [User, Token, Post, Comment, Dialog, Message],
+      entities: [User, Token, Post, Comment, Dialog, Message, OnlineUser],
       synchronize: true,
     }),
     UsersModule,
@@ -46,6 +50,8 @@ import { Message } from './message/entities/message.entity';
     FileModule,
     DialogModule,
     MessageModule,
+    ChatModule,
+    OnlineUserModule,
   ],
   controllers: [AppController],
   providers: [AppService, CloudinaryService],

@@ -1,6 +1,6 @@
 import { Message } from "src/message/entities/message.entity"
 import { User } from "src/users/entities/user.entity"
-import { Entity, JoinColumn, JoinTable, ManyToMany, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm"
+import { Column, Entity, JoinColumn, JoinTable, ManyToMany, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm"
 
 @Entity()
 export class Dialog {
@@ -11,10 +11,14 @@ export class Dialog {
     @JoinTable()
     users: User[]
 
-    @OneToOne(() => Message)
+    @OneToOne(() => Message, {nullable: true})
     @JoinColumn()
     lastMessage: Message
 
     @OneToMany(() => Message, message => message.dialog)
     messages: Message[]
+
+    @ManyToMany(() => User)
+    @JoinTable()
+    hidden_users: User[]
 }

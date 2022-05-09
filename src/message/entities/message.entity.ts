@@ -1,6 +1,6 @@
 import { Dialog } from "src/dialog/entities/dialog.entity";
 import { User } from "src/users/entities/user.entity";
-import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 @Entity()
 export class Message {
@@ -10,7 +10,7 @@ export class Message {
     @Column()
     text: string
 
-    @ManyToOne(() => Dialog, dialog => dialog.messages)
+    @ManyToOne(() => Dialog, dialog => dialog.messages, {onDelete: 'CASCADE'})
     dialog: Dialog
 
     @ManyToOne(() => User, user => user.messages)
@@ -18,5 +18,10 @@ export class Message {
 
     @Column({default: false})
     read: boolean
-    
+
+    @CreateDateColumn()
+    createdAt: Date;
+
+    @UpdateDateColumn()
+    updateAt: Date;
 }

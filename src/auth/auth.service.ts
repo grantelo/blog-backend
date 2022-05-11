@@ -45,18 +45,14 @@ export class AuthService {
   }
 
   async validateRefreshToken(user, refreshToken: string) {
-    console.log(refreshToken);
 
     const token = await this.tokenService.findOne({
       token: refreshToken,
       type: TokenType.REFRESH_TOKEN,
     });
 
-    console.log(token);
 
     if (!token) return null;
-
-    console.log('dsadasdkjsidsadjsadusiagdsadtsafdytsafdsayt');
 
     const tokens: IToken = this.tokenService.generateJwtTokens(user);
     await this.tokenService.updateOrCreate(
@@ -82,7 +78,6 @@ export class AuthService {
 
   async login(user: User) {
     const tokens: IToken = await this.tokenService.generateJwtTokens(user);
-    console.log(tokens);
     await this.tokenService.updateOrCreate(
       user.id,
       tokens.refreshToken,
@@ -105,7 +100,6 @@ export class AuthService {
     }
 
     const activationLink = v4();
-    console.log(dto);
     const hashPassword = await bcrypt.hash(dto.password, 3);
     await this.mailService.sendActivationMail(
       dto.email,
@@ -145,6 +139,13 @@ export class AuthService {
 
   async changePassword(userId: number, dto: ChangePasswordUserDto) {
     const { password, newPassword, repeatNewPassword } = dto;
+    const user = await this.userService.findById(userId)
+
+    if (!user) return new NotFoundException("Учетная запись не найдена");
+
+    const isPassEqual = await bcrypt.compare(dto.password, user.password);
+
+    if (!isPassEqual) return new BadRequestException("Старый пароль введен не верно!");
 
     if (password === newPassword)
       return new BadRequestException(
@@ -174,13 +175,21 @@ export class AuthService {
       `${process.env.CLIENT_URL}/auth/reset-password?token=` + token,
     );
   }
+  
 
   async resetPassword(
     userId: number,
     token: string,
     dto: ResetPasswordUserDto,
   ) {
-    await this.changePassword(userId, dto);
+    const { newPassword, repeatNewPassword } = dto;
+
+    if (newPassword !== repeatNewPassword)
+      return new BadRequestException('Пароли не совпадают');
+
+    const hashPassword = await bcrypt.hash(dto.newPassword, 3);
+
+    await this.userService.update(userId, { password: hashPassword });
     await this.tokenService.delete(token);
   }
 }

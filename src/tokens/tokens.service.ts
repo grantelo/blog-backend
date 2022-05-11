@@ -43,11 +43,7 @@ export class TokensService {
   }
 
   async findOne(condition: Object) {
-    console.log('condition:');
-    console.log(condition);
     const t = await this.repository.find();
-    console.log('matched:');
-    console.log(t);
     return this.repository.findOne(condition);
   }
 

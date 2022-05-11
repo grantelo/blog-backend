@@ -42,7 +42,6 @@ export class PostController {
 
   @Get('search')
   searchPosts(@Query() body: string) {
-    console.log(body);
     return this.postService.search(body);
   }
 

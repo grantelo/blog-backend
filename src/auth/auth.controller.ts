@@ -65,7 +65,6 @@ export class AuthController {
   @UseGuards(RefreshJwtAuthGuard)
   @Get('refresh')
   refresh(@Req() req) {
-    console.log(req.user);
     return req.user;
   }
 
@@ -92,6 +91,5 @@ export class AuthController {
     @Body() dto: ResetPasswordUserDto,
   ) {
     await this.authService.resetPassword(req.user.id, token, dto);
-    req.redirect(process.env.CLIENT_URL);
   }
 }

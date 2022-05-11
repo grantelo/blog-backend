@@ -4,7 +4,6 @@ import { MailService } from './mail.service';
 import {ConfigService } from '@nestjs/config';
 
 function f() {
-  console.log("Hello" + process.env.SMTP_HOST)
   return process.env.SMTP_HOST
 }
 

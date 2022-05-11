@@ -30,8 +30,6 @@ export class RefreshJwtStrategy extends PassportStrategy(
       req.cookies['refreshToken'],
     );
 
-    console.log(user);
-
     if (!user) throw new UnauthorizedException();
 
     return user;

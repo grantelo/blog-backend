@@ -16,6 +16,16 @@ import { CloudinaryService } from './cloudinary/cloudinary.service';
 import { CommentModule } from './comment/comment.module';
 import { Comment } from './comment/entities/comment.entity';
 import { FileModule } from './file/file.module';
+import { DialogModule } from './dialog/dialog.module';
+import { Dialog } from './dialog/entities/dialog.entity';
+import { OnlineUserModule } from './online-user/online-user.module';
+import { OnlineUser } from './online-user/entities/online-user.entity';
+import { ChatModule } from './chat/chat.module';
+import { MessageModule } from './message/message.module';
+import { Message } from './message/entities/message.entity';
+
+
+
 
 @Module({
   imports: [
@@ -29,7 +39,7 @@ import { FileModule } from './file/file.module';
       username: 'postgres',
       password: '1111',
       database: 'blog',
-      entities: [User, Token, Post, Comment],
+      entities: [User, Token, Post, Comment, Dialog, OnlineUser, Message],
       synchronize: true,
     }),
     UsersModule,
@@ -40,6 +50,10 @@ import { FileModule } from './file/file.module';
     CloudinaryModule,
     CommentModule,
     FileModule,
+    DialogModule,
+    OnlineUserModule,
+    ChatModule,
+    MessageModule,
   ],
   controllers: [AppController],
   providers: [AppService, CloudinaryService],

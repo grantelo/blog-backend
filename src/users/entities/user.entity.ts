@@ -1,7 +1,9 @@
+import { Message } from 'src/message/entities/message.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -28,6 +30,9 @@ export class User {
 
   @Column({ default: '' })
   avatar: string;
+
+  @OneToMany(() => Message, message => message.user)
+  messages: Message[]
 
   @CreateDateColumn()
   createdAt: Date;

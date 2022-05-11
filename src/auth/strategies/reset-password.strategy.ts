@@ -1,6 +1,6 @@
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
-import { Injectable, Param } from '@nestjs/common';
+import { Injectable, Param, Request } from '@nestjs/common';
 import { AuthService } from '../auth.service';
 
 @Injectable()
@@ -13,11 +13,13 @@ export class ResetPasswordStrategy extends PassportStrategy(
       jwtFromRequest: ExtractJwt.fromUrlQueryParameter('token'),
       ignoreExpiration: false,
       secretOrKey: process.env.JWT_FORGOT_SECRET,
+      passReqToCallback: true
     });
   }
 
-  async validate(@Param('token') token: string, payload: any) {
+  async validate(req, payload: any) {
     const { iat, exp, sub, ...user } = payload;
+    const token = req.query.token
 
     await this.authService.validateToken(user, token);
 

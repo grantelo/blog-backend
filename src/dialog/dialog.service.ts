@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UsersService } from 'src/users/users.service';
-import { Repository } from 'typeorm';
+import { Brackets, Repository } from 'typeorm';
 import { CreateDialogDto } from './dto/create-dialog.dto';
 import { UpdateDialogDto } from './dto/update-dialog.dto';
 import { Dialog } from './entities/dialog.entity';
@@ -15,9 +15,6 @@ export class DialogService {
   ) {}
 
   create(createDialogDto: CreateDialogDto) {
-    console.log("fff");
-    console.log(createDialogDto);
-    
     return this.repository.save({users: createDialogDto.users.map(userId =>({id: userId}))})
   }
 
@@ -27,20 +24,20 @@ export class DialogService {
     .leftJoinAndSelect('dialog.messages', 'messages')
     .leftJoinAndSelect('dialog.lastMessage', 'lastMessage')
     .leftJoinAndSelect('dialog.users', 'users')
-    .leftJoin('dialog.hidden_users', 'hidden_users')
+    .leftJoinAndSelect('dialog.hidden_users', 'hidden_users')
     .where('users.id = :id', { id: userId })
-    .where('hidden_users.id <> :id', { id: userId })
+    .andWhere(new Brackets(sqb => {
+      sqb.where('hidden_users.id = :id', { id: userId });
+      sqb.orWhere("hidden_users.id IS NULL");
+  }))
     .getMany()
-
-    console.log(a);
     
-
     return a
 
   }
 
   findOne(id: number) {
-    return this.repository.findOne(id, {relations: ['users', 'hidden_users']})
+    return this.repository.findOne(id, {relations: ['users']})
   }
 
   save(dialog: Dialog) {
@@ -60,9 +57,6 @@ export class DialogService {
 
     if (dialog?.hidden_users?.find(user => user.id === userId)) throw new NotFoundException("Диалог уже удален")
 
-    console.log(dialog);
-    
-        
     const countUsersInDialog = dialog.users.length
     const countHiddenUsersInDialog = dialog.hidden_users.length
 

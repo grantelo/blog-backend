@@ -3,7 +3,6 @@ import { DialogService } from './dialog.service';
 import { DialogController } from './dialog.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Dialog } from './entities/dialog.entity';
-import { UsersService } from 'src/users/users.service';
 import { UsersModule } from 'src/users/users.module';
 
 @Module({

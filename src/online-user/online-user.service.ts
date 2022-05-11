@@ -20,8 +20,8 @@ export class OnlineUserService {
     return `This action returns all onlineUser`;
   }
 
-  findOne(id: number) {
-    return this.repository.findOne(id);
+  findOne(userId: number) {
+    return this.repository.findOne({user: {id: userId}});
   }
 
   update(id: number, updateOnlineUserDto: UpdateOnlineUserDto) {

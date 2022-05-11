@@ -15,6 +15,9 @@ export class Dialog {
     @JoinColumn()
     lastMessage: Message
 
+    @Column({default: 0})
+    countUnread: number
+
     @OneToMany(() => Message, message => message.dialog)
     messages: Message[]
 

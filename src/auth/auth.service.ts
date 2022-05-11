@@ -45,18 +45,14 @@ export class AuthService {
   }
 
   async validateRefreshToken(user, refreshToken: string) {
-    console.log(refreshToken);
 
     const token = await this.tokenService.findOne({
       token: refreshToken,
       type: TokenType.REFRESH_TOKEN,
     });
 
-    console.log(token);
 
     if (!token) return null;
-
-    console.log('dsadasdkjsidsadjsadusiagdsadtsafdytsafdsayt');
 
     const tokens: IToken = this.tokenService.generateJwtTokens(user);
     await this.tokenService.updateOrCreate(
@@ -82,7 +78,6 @@ export class AuthService {
 
   async login(user: User) {
     const tokens: IToken = await this.tokenService.generateJwtTokens(user);
-    console.log(tokens);
     await this.tokenService.updateOrCreate(
       user.id,
       tokens.refreshToken,
@@ -105,7 +100,6 @@ export class AuthService {
     }
 
     const activationLink = v4();
-    console.log(dto);
     const hashPassword = await bcrypt.hash(dto.password, 3);
     await this.mailService.sendActivationMail(
       dto.email,

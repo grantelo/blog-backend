@@ -19,7 +19,6 @@ export class ResetPasswordStrategy extends PassportStrategy(
 
   async validate(req, payload: any) {
     const { iat, exp, sub, ...user } = payload;
-    console.log("happy");
     const token = req.query.token
 
     await this.authService.validateToken(user, token);

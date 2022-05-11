@@ -20,14 +20,17 @@ export class MessageController {
   // findAll() {
   //   return this.messageService.findAll();
   // }
+  
 
   @UseGuards(JwtAuthGuard)
   @Get()
   async findAllByDialog(@Req() req, @Query('dialogId') dialogId: string) {
+    console.log(req.user);
+    
     const userId = req.user.id
 
     await this.messageService.updateReadStatus(userId, +dialogId)
-    return this.messageService.findAllByDialog(req.user.userId, +dialogId)
+    return this.messageService.findAllByDialog(userId, +dialogId)
   }
 
   @Get(':id')

@@ -1,9 +1,16 @@
 import { Injectable } from '@nestjs/common';
-import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
+import {
+  OnGatewayConnection,
+  OnGatewayDisconnect,
+  OnGatewayInit,
+  SubscribeMessage,
+  WebSocketGateway,
+  WebSocketServer,
+} from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { OnlineUserService } from 'src/online-user/online-user.service';
 import { SocketService } from 'src/socket/socket.service';
-
+import { UsersService } from '../users/users.service';
 
 @WebSocketGateway({
   cors: {
@@ -11,80 +18,84 @@ import { SocketService } from 'src/socket/socket.service';
   },
 })
 @Injectable()
-export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit {
+export class ChatGateway
+  implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit
+{
   constructor(
     private onlineUserService: OnlineUserService,
-    private socketService: SocketService
+    private userService: UsersService,
+    private socketService: SocketService,
   ) {}
 
-  private onlineUser: any
-
   @WebSocketServer()
-  server: Server
+  server: Server;
 
   afterInit(server: Server) {
-    console.log("after init");
-    
-    console.log(this.server);
-
-    server.emit('message:hello', 'hello')
-    this.socketService.socket = this.server;
+    this.socketService.socket = server;
   }
 
   async handleConnection(socket: Socket, ...args: any[]) {
-    console.log(socket.handshake.query);
-    
-    const userId = +socket.handshake.query.userId as number
+    const userId = +socket.handshake.query.userId as number;
 
-    if (!userId) return
+    if (!userId) return;
 
-    this.onlineUser = await this.onlineUserService.findOne(userId)
+    let onlineUser = await this.onlineUserService.findOne(userId);
+    console.log('aaaz');
+    console.log(onlineUser);
 
-    if (!this.onlineUser) {
-      console.log("xff");
+    if (!onlineUser) {
+      console.log('xff');
       console.log();
-      
-      this.onlineUser = await this.onlineUserService.create({userId})
-      console.log(this.onlineUser);
-      
-      socket.broadcast.emit("user:online", userId)
+
+      onlineUser = await this.onlineUserService.create({ userId });
+      console.log(onlineUser);
+
+      socket.broadcast.emit('user:online', userId);
+    } else {
+      onlineUser.countTabs++;
+      console.log(onlineUser);
+      await this.onlineUserService.save(onlineUser);
     }
-    else {
-      this.onlineUser.countTabs++
-      await this.onlineUserService.save(this.onlineUser)
-    }
+
+    await this.userService.update(onlineUser.user.id, {
+      isOnline: true,
+    });
   }
 
   async handleDisconnect(socket: Socket) {
-    if (!this.onlineUser) return
+    const userId = +socket.handshake.query.userId as number;
 
-    this.onlineUser.countTabs--
+    const onlineUser = await this.onlineUserService.findOne(userId);
 
-    if(!this.onlineUser.countTabs) {
-      await this.onlineUserService.remove(this.onlineUser)
-      return socket.broadcast.emit("user:disconnected", this.onlineUser.id)
+    onlineUser.countTabs--;
+
+    if (!onlineUser.countTabs) {
+      await this.onlineUserService.remove(onlineUser);
+      await this.userService.update(onlineUser.user.id, {
+        isOnline: false,
+      });
+      return socket.broadcast.emit('user:disconnected', onlineUser.user.id);
     }
 
-    await this.onlineUserService.save(this.onlineUser)
+    await this.onlineUserService.save(onlineUser);
   }
 
   @SubscribeMessage('dialog:join')
   handleDialogJoin(socket: Socket, dialogId: string): void {
     console.log('dialog:join');
-    
+
     console.log(dialogId);
-    
-    socket.join(dialogId)
+
+    socket.join(dialogId.toString());
   }
 
   @SubscribeMessage('dialog:typing')
   handleDialogTyping(socket: Socket): void {
-    socket.broadcast.emit("dialog:typing")
+    socket.broadcast.emit('dialog:typing');
   }
 
   @SubscribeMessage('message:read')
-  handleMessageRead(socket: Socket, dialogId: string): void {
-    socket.to(dialogId).emit("message:readed", dialogId)
+  handleMessageRead(socket: Socket, dialogId: number): void {
+    socket.to(dialogId.toString()).emit('message:readed', dialogId);
   }
-
 }

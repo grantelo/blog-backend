@@ -14,7 +14,6 @@ import { AuthService } from './auth.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { RefreshJwtAuthGuard } from './guards/refreshJwt-auth.guard';
-import { TokensService } from '../tokens/tokens.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { ChangePasswordUserDto } from '../users/dto/change-password-user.dto';
 import { ResetPasswordUserDto } from '../users/dto/reset-password-user.dto';
@@ -24,10 +23,7 @@ import { ForgotPasswordUserDto } from '../users/dto/forgot-password-user.dto';
 
 @Controller('auth')
 export class AuthController {
-  constructor(
-    private readonly authService: AuthService,
-    private readonly tokenService: TokensService,
-  ) {}
+  constructor(private readonly authService: AuthService) {}
 
   @UseGuards(LocalAuthGuard)
   @Post('login')

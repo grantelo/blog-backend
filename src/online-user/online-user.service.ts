@@ -2,18 +2,17 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateOnlineUserDto } from './dto/create-online-user.dto';
-import { UpdateOnlineUserDto } from './dto/update-online-user.dto';
 import { OnlineUser } from './entities/online-user.entity';
 
 @Injectable()
 export class OnlineUserService {
   constructor(
     @InjectRepository(OnlineUser)
-    private readonly repository: Repository<OnlineUser>
+    private readonly repository: Repository<OnlineUser>,
   ) {}
 
   create(createOnlineUserDto: CreateOnlineUserDto) {
-    return this.repository.save({user: {id: createOnlineUserDto.userId}});
+    return this.repository.save({ user: { id: createOnlineUserDto.userId } });
   }
 
   findAll() {
@@ -21,15 +20,18 @@ export class OnlineUserService {
   }
 
   findOne(userId: number) {
-    return this.repository.findOne({user: {id: userId}});
+    return this.repository.findOne(
+      { user: { id: userId } },
+      { relations: ['user'] },
+    );
   }
 
-  update(id: number, updateOnlineUserDto: UpdateOnlineUserDto) {
-    return `This action updates a #${id} onlineUser`;
+  update(id: number, updateOnlineUserDto: any) {
+    return this.repository.update(id, updateOnlineUserDto);
   }
 
   save(onlineUser: OnlineUser) {
-    return this.repository.save(onlineUser)
+    return this.repository.save(onlineUser);
   }
 
   remove(onlineUser: OnlineUser) {

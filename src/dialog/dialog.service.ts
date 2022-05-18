@@ -15,33 +15,37 @@ export class DialogService {
   ) {}
 
   create(createDialogDto: CreateDialogDto) {
-    return this.repository.save({users: createDialogDto.users.map(userId =>({id: userId}))})
+    return this.repository.save({
+      users: createDialogDto.users.map((userId) => ({ id: userId })),
+    });
   }
 
   async findAll(userId: number) {
     const a = await this.repository
-    .createQueryBuilder('dialog')
-    .leftJoinAndSelect('dialog.messages', 'messages')
-    .leftJoinAndSelect('dialog.lastMessage', 'lastMessage')
-    .leftJoinAndSelect('dialog.users', 'users')
-    .leftJoinAndSelect('dialog.hidden_users', 'hidden_users')
-    .where('users.id = :id', { id: userId })
-    .andWhere(new Brackets(sqb => {
-      sqb.where('hidden_users.id = :id', { id: userId });
-      sqb.orWhere("hidden_users.id IS NULL");
-  }))
-    .getMany()
-    
-    return a
+      .createQueryBuilder('dialog')
+      .leftJoinAndSelect('dialog.messages', 'messages')
+      .leftJoinAndSelect('dialog.lastMessage', 'lastMessage')
+      .leftJoinAndSelect('dialog.users', 'users')
+      .leftJoinAndSelect('dialog.hidden_users', 'hidden_users')
+      .where(
+        new Brackets((sqb) => {
+          sqb.where('hidden_users.id <> :id', { id: userId });
+          sqb.orWhere('hidden_users.id IS NULL');
+        }),
+      )
+      .getMany();
 
+    console.log(a[0].users);
+
+    return a;
   }
 
   findOne(id: number) {
-    return this.repository.findOne(id, {relations: ['users']})
+    return this.repository.findOne(id, { relations: ['users'] });
   }
 
   save(dialog: Dialog) {
-    return this.repository.save(dialog)
+    return this.repository.save(dialog);
   }
 
   update(id: number, updateDialogDto: UpdateDialogDto) {
@@ -49,22 +53,26 @@ export class DialogService {
   }
 
   async remove(userId: number, dialogId: number) {
-    const dialog = await this.repository.findOne(dialogId, {relations: ['hidden_users', 'users']})
+    const dialog = await this.repository.findOne(dialogId, {
+      relations: ['hidden_users', 'users'],
+    });
 
-    if (!dialog) throw new NotFoundException("Диалог не найден")
+    if (!dialog) throw new NotFoundException('Диалог не найден');
 
-    const user = await this.userService.findById(userId)
+    const user = await this.userService.findById(userId);
 
-    if (dialog?.hidden_users?.find(user => user.id === userId)) throw new NotFoundException("Диалог уже удален")
+    if (dialog?.hidden_users?.find((user) => user.id === userId))
+      throw new NotFoundException('Диалог уже удален');
 
-    const countUsersInDialog = dialog.users.length
-    const countHiddenUsersInDialog = dialog.hidden_users.length
+    const countUsersInDialog = dialog.users.length;
+    const countHiddenUsersInDialog = dialog.hidden_users.length;
 
-    if (countHiddenUsersInDialog + 1 === countUsersInDialog) return this.repository.remove(dialog)
+    if (countHiddenUsersInDialog + 1 === countUsersInDialog)
+      return this.repository.remove(dialog);
 
-    if (!dialog.hidden_users) dialog.hidden_users = [user]
-    else dialog.hidden_users.push(user)
-  
-    return this.repository.save(dialog)
+    if (!dialog.hidden_users) dialog.hidden_users = [user];
+    else dialog.hidden_users.push(user);
+
+    return this.repository.save(dialog);
   }
 }

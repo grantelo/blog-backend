@@ -1,27 +1,36 @@
-import { Message } from "src/message/entities/message.entity"
-import { User } from "src/users/entities/user.entity"
-import { Column, Entity, JoinColumn, JoinTable, ManyToMany, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm"
+import { Message } from 'src/message/entities/message.entity';
+import { User } from 'src/users/entities/user.entity';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  JoinTable,
+  ManyToMany,
+  OneToMany,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @Entity()
 export class Dialog {
-    @PrimaryGeneratedColumn()
-    id: number
-    
-    @ManyToMany(() => User)
-    @JoinTable()
-    users: User[]
+  @PrimaryGeneratedColumn()
+  id: number;
 
-    @OneToOne(() => Message, {nullable: true})
-    @JoinColumn()
-    lastMessage: Message
+  @ManyToMany(() => User)
+  @JoinTable()
+  users: User[];
 
-    @Column({default: 0})
-    countUnread: number
+  @OneToOne(() => Message, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn()
+  lastMessage: Message;
 
-    @OneToMany(() => Message, message => message.dialog)
-    messages: Message[]
+  @Column({ default: 0 })
+  countUnread: number;
 
-    @ManyToMany(() => User)
-    @JoinTable()
-    hidden_users: User[]
+  @OneToMany(() => Message, (message) => message.dialog)
+  messages: Message[];
+
+  @ManyToMany(() => User)
+  @JoinTable()
+  hidden_users: User[];
 }

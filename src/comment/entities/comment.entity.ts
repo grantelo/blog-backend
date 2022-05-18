@@ -27,6 +27,7 @@ export class Comment {
   @ManyToOne(() => Post, {
     nullable: false,
     eager: true,
+    onDelete: 'CASCADE',
   })
   @JoinColumn()
   post: Post;

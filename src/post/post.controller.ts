@@ -25,9 +25,21 @@ export class PostController {
     return this.postService.create(req.user.id, createPostDto);
   }
 
+  @Get('search')
+  searchPosts(@Query('query') body: string) {
+    console.log('даа');
+    console.log(body);
+    return this.postService.search(body);
+  }
+
   @Get()
-  findAll() {
-    return this.postService.findAll();
+  popular() {
+    return this.postService.popular();
+  }
+
+  @Get('new')
+  new() {
+    return this.postService.new();
   }
 
   @Get(':id')
@@ -38,11 +50,6 @@ export class PostController {
   @Get('tag/:title')
   searchByTag(@Param('title') title: string) {
     return this.postService.searchByTag(title);
-  }
-
-  @Get('search')
-  searchPosts(@Query() body: string) {
-    return this.postService.search(body);
   }
 
   @Patch(':id')

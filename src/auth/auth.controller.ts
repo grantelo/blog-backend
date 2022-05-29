@@ -28,7 +28,7 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   @Post('login')
   async login(@Res({ passthrough: true }) response: Response, @Req() req) {
-    const user = await this.authService.login(req.user);
+    const user = await this.authService.login(req.user.id);
     response.cookie('refreshToken', user.refreshToken, {
       maxAge: 1000 * 60 * 60 * 24 * 30,
       httpOnly: true,

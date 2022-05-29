@@ -21,12 +21,34 @@ export class PostService {
     });
   }
 
-  findAll() {
-    return this.repository.find({
-      order: {
-        createdAt: 'DESC',
-      },
-    });
+  async new(userId?: number) {
+    const t = await this.repository.query(
+      'select * from (select\n' +
+        '    distinct on (public.post.id) public.post.id,\n' +
+        '    title,\n' +
+        '    public.post."createdAt",\n' +
+        '    "public".post.body,\n' +
+        '    "public".post.tags,\n' +
+        '    COUNT(public.like."postId") over(PARTITION by public.post.id) as "likesCount",\n' +
+        '    COUNT(public.like."userId") filter(\n' +
+        '        where\n' +
+        '            "public"."like"."userId" = $1\n' +
+        '    ) over(PARTITION by public.post.id) != 0 as isLike\n' +
+        'from\n' +
+        '    "public".post\n' +
+        '    left join public.like on public.like."postId" = post.id) as t\n' +
+        'order by "createdAt" desc\n',
+      [userId],
+    );
+    // .createQueryBuilder('post')
+    // .leftJoinAndMapOne('post.likes', 'post.likes', 'likes', 'likes')
+    // //.leftJoinAndSelect('likes.user', 'user')
+    // //.loadRelationCountAndMap('post.countLikes', 'post.likes')
+    // .getMany();
+
+    console.log(t);
+
+    return t;
   }
 
   async searchByTag(tag: string) {
@@ -44,33 +66,68 @@ export class PostService {
     };
   }
 
-  async popular() {
-    const qb = this.repository.createQueryBuilder('posts');
+  async popular(userId?: number) {
+    const t = await this.repository.query(
+      'select * from (select\n' +
+        '    distinct on (public.post.id) public.post.id,\n' +
+        '    title,\n' +
+        '    public.post."createdAt",\n' +
+        '    "public".post.body,\n' +
+        '    "public".post.tags,\n' +
+        '    COUNT(public.like."postId") over(PARTITION by public.post.id) as "likesCount",\n' +
+        '    COUNT(public.like."userId") filter(\n' +
+        '        where\n' +
+        '            "public"."like"."userId" = $1!\n' +
+        '    ) over(PARTITION by public.post.id) != 0 as isLike\n' +
+        'from\n' +
+        '    "public".post\n' +
+        '    left join public.like on public.like."postId" = post.id) as t\n' +
+        'order by "likesCount" desc\n',
+      [userId],
+    );
 
-    qb.orderBy('views', 'DESC');
-    qb.limit(10);
+    return t;
 
-    const [items, total] = await qb.getManyAndCount();
+    // return this.repository.find({
+    //   order: {
+    //     createdAt: 'DESC',
+    //   },
+    // });
 
-    return {
-      items,
-      total,
-    };
+    // const qb = this.repository.createQueryBuilder('posts');
+    //
+    // qb.orderBy('views', 'DESC');
+    // qb.limit(10);
+    //
+    // const [items, total] = await qb.getManyAndCount();
+    //
+    // return {
+    //   items,
+    //   total,
+    // };
   }
 
   async search(body: string) {
     const qb = this.repository
       .createQueryBuilder('posts')
-      .where('posts.body ILIKE :body', { body });
+      .where('posts.title ilike :title', { title: `%${body}%` })
+      .orWhere('posts.tags ilike :tags', { tags: `%${body}%` });
+    // .limit(10);
 
-    qb.orderBy('views', 'DESC');
-    qb.limit(10);
+    //qb.orderBy('views', 'DESC');
 
     const [items, total] = await qb.getManyAndCount();
 
+    console.log('cccs');
+    console.log(body);
+    console.log({
+      posts: items,
+      totalCount: total,
+    });
+
     return {
-      items,
-      total,
+      posts: items,
+      totalCount: total,
     };
   }
 

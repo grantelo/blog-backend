@@ -13,7 +13,6 @@ import { CreateUserDto } from '../users/dto/create-user.dto';
 import { TokensService } from '../tokens/tokens.service';
 import { MailService } from '../mail/mail.service';
 import { LoginUserDto } from '../users/dto/login-user.dto';
-import { User } from '../users/entities/user.entity';
 import { IToken } from '../tokens/interfaces/token.interface';
 import { TokenType } from '../tokens/enums/token.enum';
 import { ChangePasswordUserDto } from '../users/dto/change-password-user.dto';
@@ -45,12 +44,10 @@ export class AuthService {
   }
 
   async validateRefreshToken(user, refreshToken: string) {
-
     const token = await this.tokenService.findOne({
       token: refreshToken,
       type: TokenType.REFRESH_TOKEN,
     });
-
 
     if (!token) return null;
 
@@ -76,7 +73,8 @@ export class AuthService {
     if (!candidateToken) throw new UnauthorizedException();
   }
 
-  async login(user: User) {
+  async login(userId: number) {
+    const user = await this.userService.findById(userId);
     const tokens: IToken = await this.tokenService.generateJwtTokens(user);
     await this.tokenService.updateOrCreate(
       user.id,
@@ -139,13 +137,14 @@ export class AuthService {
 
   async changePassword(userId: number, dto: ChangePasswordUserDto) {
     const { password, newPassword, repeatNewPassword } = dto;
-    const user = await this.userService.findById(userId)
+    const user = await this.userService.findById(userId);
 
-    if (!user) return new NotFoundException("Учетная запись не найдена");
+    if (!user) return new NotFoundException('Учетная запись не найдена');
 
     const isPassEqual = await bcrypt.compare(dto.password, user.password);
 
-    if (!isPassEqual) return new BadRequestException("Старый пароль введен не верно!");
+    if (!isPassEqual)
+      return new BadRequestException('Старый пароль введен не верно!');
 
     if (password === newPassword)
       return new BadRequestException(
@@ -175,7 +174,6 @@ export class AuthService {
       `${process.env.CLIENT_URL}/auth/reset-password?token=` + token,
     );
   }
-  
 
   async resetPassword(
     userId: number,
